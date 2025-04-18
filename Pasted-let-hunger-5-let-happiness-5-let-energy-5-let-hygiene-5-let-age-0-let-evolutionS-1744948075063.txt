@@ -1,0 +1,220 @@
+let hunger = 5;
+let happiness = 5;
+let energy = 5;
+let hygiene = 5;
+let age = 0;
+let evolutionStage = "egg";
+let isSick = false;
+let isDead = false;
+
+const hungerEl = document.getElementById("hunger");
+const happinessEl = document.getElementById("happiness");
+const energyEl = document.getElementById("energy");
+const hygieneEl = document.getElementById("hygiene");
+const healthFill = document.getElementById("healthFill");
+const gameOverEl = document.getElementById("gameOver");
+const statusMessageEl = document.getElementById("statusMessage");
+const evolutionStageEl = document.getElementById("evolutionStage");
+const alienEl = document.getElementById("alien");
+const screenEl = document.querySelector(".screen");
+const eyeLeft = document.querySelector(".eye-left");
+const eyeRight = document.querySelector(".eye-right");
+
+// Efectos de sonido (simulados)
+const beepSound = { play: () => {}, currentTime: 0 };
+const errorSound = { play: () => {}, currentTime: 0 };
+const startupSound = { play: () => {}, currentTime: 0 };
+
+function updateStats() {
+  hungerEl.textContent = hunger;
+  happinessEl.textContent = happiness;
+  energyEl.textContent = energy;
+  hygieneEl.textContent = hygiene;
+
+  updateHealthBar();
+  updateAlienFace();
+}
+
+function updateHealthBar() {
+  const totalHealth = hunger + happiness + energy + hygiene;
+  const maxHealth = 40;
+  const healthPercentage = (totalHealth / maxHealth) * 100;
+
+  healthFill.style.width = `${healthPercentage}%`;
+
+  if (totalHealth <= 0 || age >= 40) {
+    gameOver();
+  }
+}
+
+function gameOver() {
+  isDead = true;
+  gameOverEl.style.display = "block";
+  
+  if (age >= 40) {
+    gameOverEl.innerHTML = "<p>💀 GAME OVER 💀</p><p>Tu alien ha muerto de vejez...</p>";
+  }
+  
+  disableButtons();
+  alienEl.className = "alien dead";
+}
+
+function disableButtons() {
+  document.getElementById("feedBtn").disabled = true;
+  document.getElementById("playBtn").disabled = true;
+  document.getElementById("sleepBtn").disabled = true;
+  document.getElementById("cleanBtn").disabled = true;
+}
+
+function feed() {
+  if (isDead) return;
+  
+  hunger = Math.min(hunger + (isSick ? 0.5 : 1), 10);
+  updateStats();
+  playBeep();
+  
+  alienEl.style.animation = "none";
+  setTimeout(() => {
+    alienEl.style.animation = "bounce 3s infinite ease-in-out";
+  }, 10);
+}
+
+function play() {
+  if (isDead) return;
+  
+  happiness = Math.min(happiness + (isSick ? 0.5 : 1), 10);
+  energy = Math.max(energy - 1, 0);
+  updateStats();
+  playBeep();
+  
+  screenEl.style.backgroundColor = "#1a1a1a";
+  setTimeout(() => {
+    screenEl.style.backgroundColor = "";
+  }, 300);
+}
+
+function sleep() {
+  if (isDead) return;
+  
+  energy = Math.min(energy + (isSick ? 1 : 2), 10);
+  happiness = Math.max(happiness - 1, 0);
+  updateStats();
+  playBeep();
+}
+
+function clean() {
+  if (isDead) return;
+  
+  hygiene = Math.min(hygiene + (isSick ? 1 : 2), 10);
+  updateStats();
+  playBeep();
+}
+
+function updateAlienFace() {
+  if (isDead) {
+    alienEl.className = "alien dead";
+    return;
+  }
+
+  let mood = "neutral";
+  const alertHunger = hunger <= 2;
+  const alertEnergy = energy <= 2;
+  const alertHappiness = happiness <= 2;
+  const alertHygiene = hygiene <= 2;
+
+  const lowStats = [alertHunger, alertEnergy, alertHappiness, alertHygiene].filter(Boolean).length;
+  isSick = lowStats >= 2;
+
+  if (isSick) {
+    mood = "sick";
+    statusMessageEl.textContent = "¡Estoy enfermo!";
+  } else if (alertHunger) {
+    mood = "hungry";
+    statusMessageEl.textContent = "¡Tengo hambre!";
+  } else if (alertEnergy) {
+    mood = "sleepy";
+    statusMessageEl.textContent = "¡Quiero dormir!";
+  } else if (alertHappiness) {
+    mood = "bored";
+    statusMessageEl.textContent = "¡Estoy aburrido!";
+  } else if (alertHygiene) {
+    mood = "dirty";
+    statusMessageEl.textContent = "¡Necesito un baño!";
+  } else if (hunger >= 8 && happiness >= 8 && energy >= 8 && hygiene >= 8) {
+    mood = "happy";
+    statusMessageEl.textContent = "¡Estoy feliz!";
+  }
+
+  alienEl.className = `alien ${evolutionStage} ${mood}`;
+}
+
+function checkEvolution() {
+  age++;
+  
+  if (age >= 30 && evolutionStage !== "old") {
+    evolutionStage = "old";
+    evolutionStageEl.textContent = "Etapa: Anciano";
+    statusMessageEl.textContent = "¡He envejecido!";
+  } else if (age >= 20 && evolutionStage !== "adult") {
+    evolutionStage = "adult";
+    evolutionStageEl.textContent = "Etapa: Adulto";
+    statusMessageEl.textContent = "¡Soy un adulto!";
+  } else if (age >= 10 && evolutionStage !== "baby") {
+    evolutionStage = "baby";
+    evolutionStageEl.textContent = "Etapa: Bebé";
+    statusMessageEl.textContent = "¡He nacido!";
+  }
+}
+
+setInterval(() => {
+  if (!isDead) {
+    hunger = Math.max(hunger - 1, 0);
+    happiness = Math.max(happiness - 1, 0);
+    energy = Math.max(energy - 1, 0);
+    hygiene = Math.max(hygiene - 1, 0);
+    
+    if (isSick) {
+      hunger = Math.max(hunger - 1, 0);
+      happiness = Math.max(happiness - 1, 0);
+    }
+    
+    checkEvolution();
+    updateStats();
+  }
+}, 10000);
+
+function playBeep() {
+  beepSound.currentTime = 0;
+  beepSound.play();
+}
+
+function playError() {
+  errorSound.currentTime = 0;
+  errorSound.play();
+}
+
+document.addEventListener("mousemove", (event) => {
+  const alienRect = alienEl.getBoundingClientRect();
+  const alienCenterX = alienRect.left + alienRect.width / 2;
+  const alienCenterY = alienRect.top + alienRect.height / 2;
+
+  const angleLeft = Math.atan2(event.clientY - alienCenterY, event.clientX - alienCenterX - 20);
+  const angleRight = Math.atan2(event.clientY - alienCenterY, event.clientX - alienCenterX + 20);
+
+  const leftX = Math.cos(angleLeft) * 5;
+  const leftY = Math.sin(angleLeft) * 5;
+  const rightX = Math.cos(angleRight) * 5;
+  const rightY = Math.sin(angleRight) * 5;
+
+  eyeLeft.style.transform = `translate(${leftX}px, ${leftY}px)`;
+  eyeRight.style.transform = `translate(${rightX}px, ${rightY}px)`;
+});
+
+window.addEventListener("load", () => {
+  startupSound.play();
+  setTimeout(() => {
+    document.getElementById("bootScreen").style.display = "none";
+  }, 4000);
+});
+
+updateStats();

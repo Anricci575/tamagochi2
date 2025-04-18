@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tamagotchi Alien</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="boot-screen" id="bootScreen">
+        <div class="boot-text">
+            <p>🛰️ ALIEN CORE SYSTEM</p>
+            <p>LOADING...</p>
+            <p class="glitch-text">▌▓▒░ SYSTEM ONLINE ░▒▓▌</p>
+        </div>
+    </div>
+
+    <div class="gameboy">
+        <div class="health-bar-container">
+            <p>Vida:</p>
+            <div class="health-bar">
+                <div class="health-fill" id="healthFill"></div>
+            </div>
+        </div>
+        <div class="screen">
+            <div class="alien egg" id="alien">
+                <div class="eye eye-left"></div>
+                <div class="eye eye-right"></div>
+                <div class="zipper"></div>
+            </div>
+            <div class="stats">
+                <p>Hambre: <span id="hunger">5</span></p>
+                <p>Felicidad: <span id="happiness">5</span></p>
+                <p>Energía: <span id="energy">5</span></p>
+                <p>Higiene: <span id="hygiene">5</span></p>
+            </div>
+            <div class="status-message" id="statusMessage"></div>
+            <div class="evolution-stage" id="evolutionStage">Etapa: Huevo</div>
+        </div>
+        <div class="controls">
+            <button onclick="feed()" id="feedBtn">🍎 Comer</button>
+            <button onclick="play()" id="playBtn">🎮 Jugar</button>
+            <button onclick="sleep()" id="sleepBtn">💤 Dormir</button>
+            <button onclick="clean()" id="cleanBtn">🧼 Limpiar</button>
+        </div>
+        <div class="game-over" id="gameOver" style="display: none;">
+            <p>💀 GAME OVER 💀</p>
+            <p>Tu alien ha muerto...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
